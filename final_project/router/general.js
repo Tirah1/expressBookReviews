@@ -20,28 +20,7 @@ public_users.post("/register", (req,res) => {
   return res.status(300).json({message: "you are now registered!"});
 });
 
-// Login endpoint
-public_users.post("/customer/login", (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-
-    // Check if username or password is missing
-    if (!username || !password) {
-        return res.status(404).json({ message: "Error logging in" });
-    }
-     // Find the user by username
-  const user = users.find(user => user.username === username);
-  if (!user) {
-    return res.status(401).json({ message: "Invalid username or password." }); // Unauthorized
-}
-     // Create  token
-    const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-
-         // Return the token and success message
-    return res.status(200).json({ message: "Login successful", token });
-});
-
-// Get the book list available in the shop
+ // Get the book list available in the shop
 public_users.get('/',function (req, res) {
   
   return res.status(300).json(JSON.parse(JSON.stringify(books, null, 4)));

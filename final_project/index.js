@@ -1,24 +1,32 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const session = require('express-session')
+const session = require('express-session');
 const customer_routes = require('./router/auth_users.js').authenticated;
 const genl_routes = require('./router/general.js').general;
 
 const app = express();
 
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
+// Session middleware
+app.use(session({
+    secret: "fingerprint_customer",
+    resave: true,
+    saveUninitialized: true,
+    cookie: { secure: false } // Set to true if using HTTPS
+}));
 
-app.use("/customer/auth/*", function auth(req,res,next){
+// Authentication middleware for customer routes
+app.use("/customer/auth/*", function auth(req, res, next) {
     if (req.session.authorization) {
-        let token = req.session.authorization['accessToken'];
+        const token = req.session.authorization['accessToken'];
 
         // Verify JWT token
-        jwt.verify(token, "access", (err, user) => {
+        jwt.verify(token, "fingerprint_customer", (err, user) => {
             if (!err) {
-                req.user = user;
-                next(); // Proceed to the next middleware
+                req.user = user; // Attach user info to request
+                next(); // Continue to the next middleware
             } else {
                 return res.status(403).json({ message: "User not authenticated" });
             }
@@ -28,10 +36,13 @@ app.use("/customer/auth/*", function auth(req,res,next){
     }
 });
 
- 
-const PORT =5001;
+// Define the port for the server
+const PORT = 5000;
 
-app.use("/customer", customer_routes);
-app.use("/", genl_routes);
+// Route handling
+app.use("/customer", customer_routes); // Use customer routes
+app.use("/", genl_routes); // Use general routes
 
-app.listen(PORT,()=>console.log("Server is running"));
+// Start the server
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+
