@@ -37,7 +37,7 @@ app.use("/customer/auth/*", function auth(req, res, next) {
 });
 
 // Define the port for the server
-const PORT = 5000;
+const PORT = 5001;
 
 // Route handling
 app.use("/customer", customer_routes); // Use customer routes
